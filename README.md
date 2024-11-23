@@ -13,3 +13,14 @@ This code is to create a proveably ramdom smart contract lottery.
 3. Using Chainlink VRF and Chainlink Automation
     1. Chainlink VRF -> Randomness
     2. Chainlink Automation -> Time based trigger
+
+## CEI: Checks,Effects and Interactions Method
+1. Checks first: Check statements like if. 
+2. Effects Second : Changes to variables
+3. Interactions With Other Contaracts last
+
+# Block.timestamp
+```block.timestamp()```
+Returns a uint256 value representing the timestamp of the current block. The output is the number of seconds that have passed since the Unix epoch (January 1, 1970, 00:00:00 UTC).
+
+## Chainlink Automation
