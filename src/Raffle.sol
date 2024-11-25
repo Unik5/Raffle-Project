@@ -39,6 +39,11 @@ contract Raffle is VRFConsumerBaseV2 {
     error Raffle__NotEnoughETHSent(); // error banako for suru ma enterance fee ko eth pugena bhane
     error Raffle__TransferFailed();
     error Raffle__RaffleNotOpen();
+    error Raffle_UpKeepNotNeeded(
+        uint256 currentBalance,
+        uint256 numPlayers,
+        uint256 raffleState
+    );
 
     /**Type Declarations */
     enum RaffleState {
@@ -99,17 +104,44 @@ contract Raffle is VRFConsumerBaseV2 {
         emit EnteredRaffle(msg.sender);
     }
 
+    // When is the winner supposed to be picked
+    /**
+     * @dev  This is the functio that ta chainlink automation nodes call to see if its time to perform an upkeep.
+     * The following should be true for this to return true
+     * 1. the time interval has passed between raffle runs
+     * 2. The raffle is in the open state
+     * 3. The contract has ETH(aka players)
+     * 4. (Implicit) The contaract is funded with LINK
+     */
+    function checkUpKeep(
+        bytes memory /* checkData */
+    ) public view returns (bool upKeepNeeded, bytes memory /* performData */) {
+        bool timeHasPassed = (block.timestamp - s_lastTimeStamp >= i_interval);
+        bool isOpen = RaffleState.OPEN == s_raffleState;
+        bool hasBalance = address(this).balance > 0;
+        bool hasPlayers = s_players.length > 0;
+        upKeepNeeded = (timeHasPassed && isOpen && hasBalance && hasPlayers);
+        return (upKeepNeeded, "0x0");
+    }
+
     //1. Get a random number
     //2. Use the random number to pick a player
     //3. Be automatically called
-    function pickWinner() external {
-        //check if enough time has passed
-        if (block.timestamp - s_lastTimeStamp < i_interval) {
-            revert();
+
+    function performUpkeep(bytes calldata /* performData */) external {
+        (bool upKeepNeeded, ) = checkUpKeep("");
+        if (!upKeepNeeded) {
+            revert Raffle_UpKeepNotNeeded(
+                address(this).balance,
+                s_players.length,
+                uint256(s_raffleState)
+            );
         }
+        //check if enough time has passed
+
         s_raffleState = RaffleState.CALCULATING;
         // Now pick a winner using chainlink VRM
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+        i_vrfCoordinator.requestRandomWords(
             i_gasLane, //gas lane
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
@@ -119,7 +151,7 @@ contract Raffle is VRFConsumerBaseV2 {
     }
 
     function fulfillRandomWords(
-        uint256 requestId,
+        uint256 /*requestId*/,
         uint256[] memory randomWords
     ) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
