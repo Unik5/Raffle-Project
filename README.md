@@ -24,3 +24,12 @@ This code is to create a proveably ramdom smart contract lottery.
 Returns a uint256 value representing the timestamp of the current block. The output is the number of seconds that have passed since the Unix epoch (January 1, 1970, 00:00:00 UTC).
 
 ## Chainlink Automation
+
+
+## Tests
+1. Deploy Scripts
+2. Write our tests
+    1. Work on local chain
+    2. Work on Testnet
+    3. Work on Mainnet
+    

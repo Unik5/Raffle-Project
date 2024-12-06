@@ -113,6 +113,8 @@ contract Raffle is VRFConsumerBaseV2 {
      * 3. The contract has ETH(aka players)
      * 4. (Implicit) The contaract is funded with LINK
      */
+
+    //checking whether the raffle is ready to find a winner, mathi ko conditions haru check haneko
     function checkUpKeep(
         bytes memory /* checkData */
     ) public view returns (bool upKeepNeeded, bytes memory /* performData */) {
@@ -174,5 +176,13 @@ contract Raffle is VRFConsumerBaseV2 {
 
     function getEnteranceFee() external view returns (uint256) {
         return i_enteranceFee;
+    }
+
+    function getRaffleState() external view returns (RaffleState) {
+        return s_raffleState;
+    }
+
+    function getPlayer(uint256 indexOfPlayers) external view returns (address) {
+        return s_players[indexOfPlayers];
     }
 }
